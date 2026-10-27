@@ -1,5 +1,7 @@
 # Wind Farm Energy Assessment
 
+**Case study with figures: [zaydhouachmi.github.io/work/wind-farm.html](https://zaydhouachmi.github.io/work/wind-farm.html)** · [Try the wake model in your browser](https://zaydhouachmi.github.io/#model)
+
 A Streamlit application that estimates the annual energy production of a wind
 farm from wind measurements, terrain roughness and a turbine layout. Built
 during an internship at Greenard as a lightweight, open alternative to
@@ -21,6 +23,17 @@ commercial tools such as WAsP.
    availability, electrical, turbine performance, environmental).
 5. **Results** — gross / after-wake / net energy, capacity factor, and total
    wake loss, with layout and wind rose plots.
+
+## Results
+
+Fed the 12-sector Weibull table from the WAsP "Waspdale" example site, the tool recomputes a **4.90 m/s** mean wind speed, the same value WAsP reports. A 6-turbine, 1 MW farm (54 m rotor, 50 m hub, 5 rotor diameters apart, Jensen wakes) then shows why height and terrain correction matter:
+
+| Wind climate | Mean speed | Gross energy | Net energy | Capacity factor |
+|---|---|---|---|---|
+| Raw station data (10 m) | 4.90 m/s | 3,679 MWh/yr | 2,663 MWh/yr | 5.1 % |
+| Corrected to the turbine site (50 m) | 7.88 m/s | 16,186 MWh/yr | 9,264 MWh/yr | 17.6 % |
+
+The second row puts all the wind in one direction (270°), which is the worst case for wakes: up to 62 % loss on the third turbine in a row. A real wind rose spreads the wakes out. `tests/test_model.py` checks that behaviour.
 
 ## Getting started
 
@@ -56,6 +69,7 @@ Example CSVs are included so you can see the expected columns:
 | `topography.py` | Terrain roughness handling |
 | `visualization.py` | Layout and wind rose plots |
 | `demo_*.py` | Runnable examples that produce the images above |
+| `tests/` | pytest suite for the model |
 
 `PHASE_2_AINSLIE_DERIVATION.md` documents the maths behind the wake model, and
 `CHANGELOG-v3.md` records what changed between versions (in French).
@@ -63,8 +77,11 @@ Example CSVs are included so you can see the expected columns:
 ## Tests
 
 ```bash
-python -m pytest test_wake.py test_demo_smoke.py
+pip install pytest
+python -m pytest
 ```
+
+22 tests in `tests/test_model.py` check the model against hand calculations: the Jensen wake formula, the power curve, Weibull statistics, log-law height scaling, the loss cascade, wind-aligned geometry, and the farm energy table. `demo_smoke.py` is a quick script that compares the three wake models on one layout.
 
 ## Known limitations
 
